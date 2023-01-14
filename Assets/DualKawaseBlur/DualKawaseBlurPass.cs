@@ -21,14 +21,15 @@ namespace DualKawaseBlur
 			DownSample = 1,
 			UpSample = 2,
 		}
-		
+
 		private const string PROFILER_TAG = "DualKawaseBlur";
 		private static readonly int BLUR_OFFSET_P = Shader.PropertyToID("_BlurOffset");
 		private static readonly int SOURCE_TEX_P = Shader.PropertyToID("_SourceTex");
-		private static readonly int MIP_DOWN_TEX_P = Shader.PropertyToID("_BlurMipDown");
-		private static readonly int MIP_UP_TEX_P = Shader.PropertyToID("_BlurMipDown");
 
-		private RenderTargetIdentifier colorBuffer;
+		private static readonly int MIP_DOWN_TEX_P = Shader.PropertyToID("_BlurMipDownTex");
+		private static readonly int MIP_UP_TEX_P = Shader.PropertyToID("_BlurMipUpTex");
+		
+
 		private readonly RenderTargetIdentifier mipDownBuffer = new(MIP_DOWN_TEX_P, 0, CubemapFace.Unknown, -1);
 		private readonly RenderTargetIdentifier mipUpBuffer = new(MIP_UP_TEX_P, 0, CubemapFace.Unknown, -1);
 
@@ -37,13 +38,13 @@ namespace DualKawaseBlur
 		private readonly Material material;
 		private float blurAmount;
 		private int iterations;
-		
+
 		public DualKawaseBlurPass(RenderPassEvent renderPassEvent, Material material)
 		{
 			this.renderPassEvent = renderPassEvent;
 			this.material = material;
 		}
-		
+
 		public void ConfigureBlur(float blurRadius, int steps)
 		{
 			blurAmount = blurRadius;
@@ -55,7 +56,6 @@ namespace DualKawaseBlur
 			fullDesc = renderingData.cameraData.cameraTargetDescriptor;
 			fullDesc.depthBufferBits = 0;
 
-			colorBuffer = renderingData.cameraData.renderer.cameraColorTarget;
 			cmd.GetTemporaryRT(MIP_DOWN_TEX_P, fullDesc, FilterMode.Bilinear);
 			cmd.GetTemporaryRT(MIP_UP_TEX_P, fullDesc, FilterMode.Bilinear);
 		}
@@ -73,19 +73,13 @@ namespace DualKawaseBlur
 			
 			using (new ProfilingScope(cmd, new ProfilingSampler(PROFILER_TAG))) {
 				material.SetFloat(BLUR_OFFSET_P, blurAmount);
-				
-				var lastDown = colorBuffer;
 				for (var i = 0; i < iterations; ++i) {
-					DrawFullScreenTriangle(cmd, lastDown, mipDownBuffer, material, (int)ShaderPass.DownSample);
-					lastDown = mipDownBuffer;
-				}
 
-				var lastUp = lastDown;
-				for (var i = 0; i < iterations; ++i) {
-					DrawFullScreenTriangle(cmd, lastUp, mipUpBuffer, material, (int)ShaderPass.UpSample);
-					lastUp = mipUpBuffer;
 				}
-				DrawFullScreenTriangle(cmd, lastUp, colorBuffer, material, (int)ShaderPass.Copy);
+				
+				for (var i = 0; i < iterations; ++i) {
+
+				}
 			}
 			
 			context.ExecuteCommandBuffer(cmd);

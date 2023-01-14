@@ -7,8 +7,9 @@ namespace DualKawaseBlur
 	public class DualKawaseBlurFeature : ScriptableRendererFeature
 	{
 		public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
-		public float blurRadius;
-		[Range(1, 10)]
+		[Range(0, 5)]
+		public float blurRadius = 1.0f;
+		[Range(1, 5)]
 		public int steps = 1;
 		
 		private Shader shader;

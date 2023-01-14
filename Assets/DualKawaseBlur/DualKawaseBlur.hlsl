@@ -123,6 +123,6 @@ half4 Frag_UpSample(V2F_UpSample input) : SV_TARGET
 {
 	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 	half4 col = SAMPLE_TEXTURE2D_X_LOD(_SourceTex, sampler_linear_clamp, input.uv0, 0);
-	return col * col;
+	return col * _BlurOffset;
 }
 #endif
