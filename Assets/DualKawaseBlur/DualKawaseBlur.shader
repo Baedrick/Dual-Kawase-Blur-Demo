@@ -20,7 +20,17 @@ Shader "Baedrick/DualKawaseBlur"
 		Fog {Mode Off}
 		
 		Pass
-		{
+		{ // 0
+			Name "Copy"
+			
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			ENDHLSL
+		}
+		
+		Pass
+		{ // 1
 			Name "DownSample"
 			
 			HLSLPROGRAM
@@ -30,7 +40,7 @@ Shader "Baedrick/DualKawaseBlur"
 		}
 		
 		Pass
-		{
+		{ // 2
 			Name "UpSample"
 			
 			HLSLPROGRAM

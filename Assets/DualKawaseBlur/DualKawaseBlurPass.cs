@@ -6,26 +6,58 @@ namespace DualKawaseBlur
 	
 	public class DualKawaseBlurPass : ScriptableRenderPass
 	{
-		private const string PROFILER_TAG = "DualKawaseBlur";
-		private static readonly int SOURCE_TEX_P = Shader.PropertyToID("_SourceTex");
-		private static readonly int TEMP_TEX_P = Shader.PropertyToID("_TempTex");
+		private enum DownSampleRT
+		{
+			Full = 1,
+			Half = 2,
+			Quarter = 4,
+			Eights = 8,
+			Sixteenths = 16
+		}
 		
-		private readonly RenderTargetIdentifier tempBuffer = new(TEMP_TEX_P, 0, CubemapFace.Unknown, -1);
+		private enum ShaderPass
+		{
+			Copy = 0,
+			DownSample = 1,
+			UpSample = 2,
+		}
+		
+		private const string PROFILER_TAG = "DualKawaseBlur";
+		private static readonly int BLUR_OFFSET_P = Shader.PropertyToID("_BlurOffset");
+		private static readonly int SOURCE_TEX_P = Shader.PropertyToID("_SourceTex");
+		private static readonly int MIP_DOWN_TEX_P = Shader.PropertyToID("_BlurMipDown");
+		private static readonly int MIP_UP_TEX_P = Shader.PropertyToID("_BlurMipDown");
+
+		private RenderTargetIdentifier colorBuffer;
+		private readonly RenderTargetIdentifier mipDownBuffer = new(MIP_DOWN_TEX_P, 0, CubemapFace.Unknown, -1);
+		private readonly RenderTargetIdentifier mipUpBuffer = new(MIP_UP_TEX_P, 0, CubemapFace.Unknown, -1);
+
+		private RenderTextureDescriptor fullDesc;
 		
 		private readonly Material material;
+		private float blurAmount;
+		private int iterations;
 		
 		public DualKawaseBlurPass(RenderPassEvent renderPassEvent, Material material)
 		{
 			this.renderPassEvent = renderPassEvent;
 			this.material = material;
 		}
-
+		
+		public void ConfigureBlur(float blurRadius, int steps)
+		{
+			blurAmount = blurRadius;
+			iterations = steps;
+		}
+		
 		public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
 		{
-			var fullDesc = renderingData.cameraData.cameraTargetDescriptor;
+			fullDesc = renderingData.cameraData.cameraTargetDescriptor;
 			fullDesc.depthBufferBits = 0;
-			
-			cmd.GetTemporaryRT(TEMP_TEX_P, fullDesc, FilterMode.Bilinear);
+
+			colorBuffer = renderingData.cameraData.renderer.cameraColorTarget;
+			cmd.GetTemporaryRT(MIP_DOWN_TEX_P, fullDesc, FilterMode.Bilinear);
+			cmd.GetTemporaryRT(MIP_UP_TEX_P, fullDesc, FilterMode.Bilinear);
 		}
 		
 		private static void DrawFullScreenTriangle(CommandBuffer cmd, RenderTargetIdentifier from, RenderTargetIdentifier to, Material blitMaterial, int pass)
@@ -38,10 +70,22 @@ namespace DualKawaseBlur
 		public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
 		{
 			var cmd = CommandBufferPool.Get();
-
+			
 			using (new ProfilingScope(cmd, new ProfilingSampler(PROFILER_TAG))) {
-				DrawFullScreenTriangle(cmd, renderingData.cameraData.renderer.cameraColorTarget, tempBuffer, material, 0);
-				DrawFullScreenTriangle(cmd, tempBuffer, renderingData.cameraData.renderer.cameraColorTarget, material, 1);
+				material.SetFloat(BLUR_OFFSET_P, blurAmount);
+				
+				var lastDown = colorBuffer;
+				for (var i = 0; i < iterations; ++i) {
+					DrawFullScreenTriangle(cmd, lastDown, mipDownBuffer, material, (int)ShaderPass.DownSample);
+					lastDown = mipDownBuffer;
+				}
+
+				var lastUp = lastDown;
+				for (var i = 0; i < iterations; ++i) {
+					DrawFullScreenTriangle(cmd, lastUp, mipUpBuffer, material, (int)ShaderPass.UpSample);
+					lastUp = mipUpBuffer;
+				}
+				DrawFullScreenTriangle(cmd, lastUp, colorBuffer, material, (int)ShaderPass.Copy);
 			}
 			
 			context.ExecuteCommandBuffer(cmd);
@@ -54,7 +98,8 @@ namespace DualKawaseBlur
 			if (cmd == null) {
 				throw new System.ArgumentNullException(nameof(cmd));
 			}
-			cmd.ReleaseTemporaryRT(TEMP_TEX_P);
+			cmd.ReleaseTemporaryRT(MIP_DOWN_TEX_P);
+			cmd.ReleaseTemporaryRT(MIP_UP_TEX_P);
 		}
 	}
 }

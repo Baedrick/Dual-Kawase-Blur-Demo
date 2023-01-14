@@ -8,7 +8,8 @@ namespace DualKawaseBlur
 	{
 		public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
 		public float blurRadius;
-		public int iterations;
+		[Range(1, 10)]
+		public int steps = 1;
 		
 		private Shader shader;
 		private Material material;
@@ -27,6 +28,7 @@ namespace DualKawaseBlur
 		
 		public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
 		{
+			pass.ConfigureBlur(blurRadius, steps);
 			renderer.EnqueuePass(pass);
 		}
 		
