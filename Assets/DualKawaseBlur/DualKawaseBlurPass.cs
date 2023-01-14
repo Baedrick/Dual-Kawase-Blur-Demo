@@ -10,7 +10,7 @@ namespace DualKawaseBlur
 		private static readonly int SOURCE_TEX_P = Shader.PropertyToID("_SourceTex");
 		private static readonly int TEMP_TEX_P = Shader.PropertyToID("_TempTex");
 		
-		private RenderTargetIdentifier tempBuffer = new(TEMP_TEX_P, 0, CubemapFace.Unknown, -1);
+		private readonly RenderTargetIdentifier tempBuffer = new(TEMP_TEX_P, 0, CubemapFace.Unknown, -1);
 		
 		private readonly Material material;
 		
@@ -41,7 +41,7 @@ namespace DualKawaseBlur
 
 			using (new ProfilingScope(cmd, new ProfilingSampler(PROFILER_TAG))) {
 				DrawFullScreenTriangle(cmd, renderingData.cameraData.renderer.cameraColorTarget, tempBuffer, material, 0);
-				DrawFullScreenTriangle(cmd, tempBuffer, renderingData.cameraData.renderer.cameraColorTarget, material, 0);
+				DrawFullScreenTriangle(cmd, tempBuffer, renderingData.cameraData.renderer.cameraColorTarget, material, 1);
 			}
 			
 			context.ExecuteCommandBuffer(cmd);
