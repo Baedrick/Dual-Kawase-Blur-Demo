@@ -23,13 +23,13 @@ namespace DualKawaseBlur
 		}
 
 		private const string PROFILER_TAG = "DualKawaseBlur";
+		
 		private static readonly int BLUR_OFFSET_P = Shader.PropertyToID("_BlurOffset");
+		
 		private static readonly int SOURCE_TEX_P = Shader.PropertyToID("_SourceTex");
-
 		private static readonly int MIP_DOWN_TEX_P = Shader.PropertyToID("_BlurMipDownTex");
 		private static readonly int MIP_UP_TEX_P = Shader.PropertyToID("_BlurMipUpTex");
 		
-
 		private readonly RenderTargetIdentifier mipDownBuffer = new(MIP_DOWN_TEX_P, 0, CubemapFace.Unknown, -1);
 		private readonly RenderTargetIdentifier mipUpBuffer = new(MIP_UP_TEX_P, 0, CubemapFace.Unknown, -1);
 
@@ -45,10 +45,10 @@ namespace DualKawaseBlur
 			this.material = material;
 		}
 
-		public void ConfigureBlur(float blurRadius, int steps)
+		public void ConfigureBlur(float blurRadius, int quality)
 		{
 			blurAmount = blurRadius;
-			iterations = steps;
+			iterations = quality;
 		}
 		
 		public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
@@ -70,18 +70,13 @@ namespace DualKawaseBlur
 		public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
 		{
 			var cmd = CommandBufferPool.Get();
-			
 			using (new ProfilingScope(cmd, new ProfilingSampler(PROFILER_TAG))) {
 				material.SetFloat(BLUR_OFFSET_P, blurAmount);
-				for (var i = 0; i < iterations; ++i) {
-
-				}
-				
-				for (var i = 0; i < iterations; ++i) {
-
-				}
+				var source = renderingData.cameraData.renderer.cameraColorTarget;
+				DrawFullScreenTriangle(cmd, source, mipDownBuffer, material, (int)ShaderPass.DownSample);
+				DrawFullScreenTriangle(cmd, mipDownBuffer, mipUpBuffer, material, (int)ShaderPass.UpSample);
+				DrawFullScreenTriangle(cmd, mipUpBuffer, source, material, (int)ShaderPass.Copy);
 			}
-			
 			context.ExecuteCommandBuffer(cmd);
 			cmd.Clear();
 			CommandBufferPool.Release(cmd);
