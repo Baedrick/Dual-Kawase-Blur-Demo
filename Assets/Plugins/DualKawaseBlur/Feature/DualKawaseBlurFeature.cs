@@ -1,14 +1,14 @@
-namespace DualKawaseBlur
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+
+namespace Plugins.DualKawaseBlur.Feature
 {
-	using UnityEngine;
-	using UnityEngine.Rendering;
-	using UnityEngine.Rendering.Universal;
-	
 	public class DualKawaseBlurFeature : ScriptableRendererFeature
 	{
 		public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
-		public DualKawaseBlurPass.Quality quality = DualKawaseBlurPass.Quality.Low;
-		[Range(0, 20)] public float blurRadius = 0.0f;
+		public DualKawaseBlurPass.Quality quality = DualKawaseBlurPass.Quality.Medium;
+		[Range(0.0f, 10.0f)] public float blurRadius = 0.0f;
 		
 		private Shader shader;
 		private Material material;
@@ -23,6 +23,7 @@ namespace DualKawaseBlur
 				material = new Material(shader);
 			}
 			pass = new DualKawaseBlurPass(renderPassEvent, material);
+			this.hideFlags = HideFlags.HideInInspector;
 		}
 		
 		public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)

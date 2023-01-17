@@ -7,7 +7,7 @@ Shader "Baedrick/DualKawaseBlur"
 	
 	HLSLINCLUDE
 	#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-	#include "DualKawaseBlur.hlsl"
+	#include "Assets/Plugins/DualKawaseBlur/Shaders/DualKawaseBlur.hlsl"
 	ENDHLSL
 	
 	SubShader

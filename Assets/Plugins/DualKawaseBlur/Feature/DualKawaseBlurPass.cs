@@ -1,12 +1,10 @@
 using System;
-using Unity.Mathematics;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
-namespace DualKawaseBlur
+namespace Plugins.DualKawaseBlur.Feature
 {
-	using UnityEngine;
-	using UnityEngine.Rendering;
-	using UnityEngine.Rendering.Universal;
-	
 	public class DualKawaseBlurPass : ScriptableRenderPass
 	{
 		public enum Quality
