@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -12,15 +11,6 @@ namespace Plugins.DualKawaseBlur.Feature
 			Low,
 			Medium,
 			High,
-			Film
-		}
-		
-		private enum DownSampleRT
-		{
-			Half = 2,
-			Quarter = 4,
-			Eights = 8,
-			Sixteenths = 16
 		}
 
 		private enum ShaderPass
@@ -40,12 +30,10 @@ namespace Plugins.DualKawaseBlur.Feature
 		private static readonly int BUFFER_0_TEX_P = Shader.PropertyToID("_BufferRT0");
 		private static readonly int BUFFER_1_TEX_P = Shader.PropertyToID("_BufferRT1");
 		private static readonly int BUFFER_2_TEX_P = Shader.PropertyToID("_BufferRT2");
-		private static readonly int BUFFER_3_TEX_P = Shader.PropertyToID("_BufferRT3");
 		private static readonly int BLUR_TEX_P = Shader.PropertyToID("_BlurTex");
 		private readonly RenderTargetIdentifier buffer0 = new(BUFFER_0_TEX_P, 0, CubemapFace.Unknown, -1);
 		private readonly RenderTargetIdentifier buffer1 = new(BUFFER_1_TEX_P, 0, CubemapFace.Unknown, -1);
 		private readonly RenderTargetIdentifier buffer2 = new(BUFFER_2_TEX_P, 0, CubemapFace.Unknown, -1);
-		private readonly RenderTargetIdentifier buffer3 = new(BUFFER_3_TEX_P, 0, CubemapFace.Unknown, -1);
 		private readonly RenderTargetIdentifier blurBuffer = new(BLUR_TEX_P, 0, CubemapFace.Unknown, -1);
 		private RenderTextureDescriptor fullDesc, halfDesc, quarterDesc, eightsDesc, sixteenthsDesc;
 
@@ -71,14 +59,14 @@ namespace Plugins.DualKawaseBlur.Feature
 			fullDesc = renderingData.cameraData.cameraTargetDescriptor;
 			fullDesc.depthBufferBits = 0;
 			halfDesc = quarterDesc = eightsDesc = sixteenthsDesc = fullDesc;
-			halfDesc.width /= (int)DownSampleRT.Half;
-			halfDesc.height /= (int)DownSampleRT.Half;
-			quarterDesc.width /= (int)DownSampleRT.Quarter;
-			quarterDesc.height /= (int)DownSampleRT.Quarter;
-			eightsDesc.width /= (int)DownSampleRT.Eights;
-			eightsDesc.height /= (int)DownSampleRT.Eights;
-			sixteenthsDesc.width /= (int)DownSampleRT.Sixteenths;
-			sixteenthsDesc.height /= (int)DownSampleRT.Sixteenths;
+			halfDesc.width /= 2;
+			halfDesc.height /= 2;
+			quarterDesc.width /= 4;
+			quarterDesc.height /= 4;
+			eightsDesc.width /= 8;
+			eightsDesc.height /= 8;
+			sixteenthsDesc.width /= 16;
+			sixteenthsDesc.height /= 16;
 			
 			cmd.GetTemporaryRT(BLUR_TEX_P, fullDesc, FilterMode.Bilinear);
 		}
@@ -125,22 +113,8 @@ namespace Plugins.DualKawaseBlur.Feature
 						DrawFullScreenTriangle(cmd, buffer1, buffer0, material, (int)ShaderPass.UpSample);
 						DrawFullScreenTriangle(cmd, buffer0, blurBuffer, material, (int)ShaderPass.UpSample);
 						break;
-					case Quality.Film:
-						cmd.GetTemporaryRT(BUFFER_0_TEX_P, halfDesc, FilterMode.Bilinear);
-						cmd.GetTemporaryRT(BUFFER_1_TEX_P, quarterDesc, FilterMode.Bilinear);
-						cmd.GetTemporaryRT(BUFFER_2_TEX_P, eightsDesc, FilterMode.Bilinear);
-						cmd.GetTemporaryRT(BUFFER_3_TEX_P, sixteenthsDesc, FilterMode.Bilinear);
-						DrawFullScreenTriangle(cmd, cameraColor, buffer0, material, (int)ShaderPass.DownSample);
-						DrawFullScreenTriangle(cmd, buffer0, buffer1, material, (int)ShaderPass.DownSample);
-						DrawFullScreenTriangle(cmd, buffer1, buffer2, material, (int)ShaderPass.DownSample);
-						DrawFullScreenTriangle(cmd, buffer2, buffer3, material, (int)ShaderPass.DownSample);
-						DrawFullScreenTriangle(cmd, buffer3, buffer2, material, (int)ShaderPass.UpSample);
-						DrawFullScreenTriangle(cmd, buffer2, buffer1, material, (int)ShaderPass.UpSample);
-						DrawFullScreenTriangle(cmd, buffer1, buffer0, material, (int)ShaderPass.UpSample);
-						DrawFullScreenTriangle(cmd, buffer0, blurBuffer, material, (int)ShaderPass.UpSample);
-						break;
 					default:
-						throw new ArgumentOutOfRangeException();
+						throw new System.ArgumentOutOfRangeException();
 				}
 				DrawFullScreenTriangle(cmd, blurBuffer, cameraColor, material, (int)ShaderPass.Copy);
 			}
@@ -157,7 +131,6 @@ namespace Plugins.DualKawaseBlur.Feature
 			cmd.ReleaseTemporaryRT(BUFFER_0_TEX_P);
 			cmd.ReleaseTemporaryRT(BUFFER_1_TEX_P);
 			cmd.ReleaseTemporaryRT(BUFFER_2_TEX_P);
-			cmd.ReleaseTemporaryRT(BUFFER_3_TEX_P);
 			cmd.ReleaseTemporaryRT(BLUR_TEX_P);
 		}
 	}
