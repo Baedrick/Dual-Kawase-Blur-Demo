@@ -23,7 +23,6 @@ namespace Plugins.DualKawaseBlur.Feature
 				material = new Material(shader);
 			}
 			pass = new DualKawaseBlurPass(renderPassEvent, material);
-			this.hideFlags = HideFlags.HideInInspector;
 		}
 		
 		public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)

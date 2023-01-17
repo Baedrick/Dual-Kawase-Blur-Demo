@@ -1,8 +1,8 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7101070345390010217
+--- !u!114 &-8099569446866970212
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09ad88cea9c50cf409315414296f4d03, type: 3}
   m_Name: DualKawaseBlurFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   renderPassEvent: 600
-  quality: 2
-  blurRadius: 0.6
+  quality: 1
+  blurRadius: 1.25
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31,8 +31,8 @@ MonoBehaviour:
   debugShaders:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
   m_RendererFeatures:
-  - {fileID: -7101070345390010217}
-  m_RendererFeatureMap: 97d0f7d924ee739d
+  - {fileID: -8099569446866970212}
+  m_RendererFeatureMap: 9c19e35d808c988f
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
