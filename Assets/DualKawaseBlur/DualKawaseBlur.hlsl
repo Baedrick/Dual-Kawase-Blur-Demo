@@ -86,14 +86,14 @@ V2F_DownSample Vert_DownSample(MeshData input, const uint vertexID : SV_VertexID
 	#endif
 
 	const float2 uv = output.uv0;
-	const float2 texelSize = _SourceTex_TexelSize * 0.5;
+	const float2 halfPixel = _SourceTex_TexelSize * 0.5;
 	const float2 offset = float2(1.0 + _BlurOffset, 1.0 + _BlurOffset);
 	
-	output.uv1.xy = uv - texelSize * offset;
-	output.uv1.zw = uv + texelSize * offset;
+	output.uv1.xy = uv - halfPixel * offset; 
+	output.uv1.zw = uv + halfPixel * offset;
 	
-	output.uv2.xy = uv - float2(texelSize.x, -texelSize.y) * offset;
-	output.uv2.zw = uv + float2(texelSize.x, -texelSize.y) * offset;
+	output.uv2.xy = uv - float2(halfPixel.x, -halfPixel.y) * offset;
+	output.uv2.zw = uv + float2(halfPixel.x, -halfPixel.y) * offset;
 	return output;
 }
 
@@ -128,20 +128,20 @@ V2F_UpSample Vert_UpSample(MeshData input, const uint vertexID : SV_VertexID)
 	#endif
 
 	const float2 uv = output.uv0;
-	const float2 texelSize = _SourceTex_TexelSize * 0.5;
+	const float2 halfPixel = _SourceTex_TexelSize * 0.5;
 	const float2 offset = float2(1.0 + _BlurOffset, 1.0 + _BlurOffset);
 	
-	output.uv1.xy = uv + float2(-texelSize.x * 2.0, 0.0) * offset;
-	output.uv1.zw = uv + float2(-texelSize.x, texelSize.y) * offset;
+	output.uv1.xy = uv + float2(-halfPixel.x * 2.0, 0.0) * offset;
+	output.uv1.zw = uv + float2(-halfPixel.x, halfPixel.y) * offset;
 	
-	output.uv2.xy = uv + float2(0.0, texelSize.y * 2.0) * offset;
-	output.uv2.zw = uv + texelSize * offset;
+	output.uv2.xy = uv + float2(0.0, halfPixel.y * 2.0) * offset;
+	output.uv2.zw = uv + halfPixel * offset;
 
-	output.uv3.xy = uv + float2(texelSize.x * 2.0, 0.0) * offset;
-	output.uv3.zw = uv + float2(texelSize.x, -texelSize.y) * offset;
+	output.uv3.xy = uv + float2(halfPixel.x * 2.0, 0.0) * offset;
+	output.uv3.zw = uv + float2(halfPixel.x, -halfPixel.y) * offset;
 	
-	output.uv4.xy = uv + float2(0.0, -texelSize.y * 2.0) * offset;
-	output.uv4.zw = uv - texelSize * offset;
+	output.uv4.xy = uv + float2(0.0, -halfPixel.y * 2.0) * offset;
+	output.uv4.zw = uv - halfPixel * offset;
 	
 	return output;
 }
