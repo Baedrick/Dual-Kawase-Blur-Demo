@@ -10,6 +10,7 @@ View it on [Sketchfab](https://sketchfab.com/3d-models/trailer-040ad3bbf0c54098b
 ## Unity Package
 Available [here](https://github.com/Baedrick/Dual-Kawase-Blur)!
 
+## Settings
 ### Render Pass Event
 Refers to where in the rendering pipeline this feature is injected into.
 Usually you would perform blurs after all post-processing effects.
