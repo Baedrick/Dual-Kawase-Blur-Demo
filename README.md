@@ -7,7 +7,7 @@ Provided under [CC4.0](https://creativecommons.org/licenses/by/4.0/).
 No Changes were made to the model. 
 View it on [Sketchfab](https://sketchfab.com/3d-models/trailer-040ad3bbf0c54098b90a87ac517d3901).
 
-### Unity Package
+## Unity Package
 Available [here](https://github.com/Baedrick/Dual-Kawase-Blur)!
 
 ### Render Pass Event
